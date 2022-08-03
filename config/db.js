@@ -8,5 +8,3 @@ db = mongoose.connect(
     }
   );
   
-
-module.exports = db
