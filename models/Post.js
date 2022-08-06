@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const PostSchema = new mongoose.Schema(
   {
     userId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
     },
@@ -27,7 +27,7 @@ const PostSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-PostSchema.pre("save", function(next){
+PostSchema.pre("updateOne", function(next){
     this.updatedAt = Date.now()
     next()
 })

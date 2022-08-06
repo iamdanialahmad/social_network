@@ -59,5 +59,50 @@ const getUser = async (req, res) => {
       res.status(500).json(err);
     }
   }
+const followUser = async (req,res) => {
+    req.body = {
+        followUserId: "62ee5bb8bdca91abea0b38a8"
+    }
+    try {
+        const followUser = await User.findById(req.body.followUserId)
+        !followUser && res.status(404).json("User doesnot exists");
 
-module.exports = {updateUser, deleteUser, getUser}
+        const user = await User.findById(req.params.id)
+
+        if(!user.following.includes(req.body.followUserId)){
+            await user.updateOne({$push: {following: req.body.followUserId}})
+            await followUser.updateOne({$push: {followers: req.params.id}})
+            res.status(200).json("User followed")
+        }else{
+            res.status(403).json("You already follow this user")
+        }
+
+    } catch (error) {
+        res.status(500).json(error)
+    }
+}
+
+const unFollowUser = async (req,res) => {
+    req.body = {
+        unfollowUserId: "62ee5bb8bdca91abea0b38a8"
+    }
+    try {
+        const unfollowUser = await User.findById(req.body.unfollowUserId)
+        !unfollowUser && res.status(404).json("User doesnot exists");
+
+        const user = await User.findById(req.params.id)
+
+        if(!user.following.includes(req.body.unfollowUser)){
+            await user.updateOne({$pull: {following: req.body.unfollowUserId}})
+            await unfollowUser.updateOne({$pull: {followers: req.params.id}})
+            res.status(200).json("User unfollowed")
+        }else{
+            res.status(403).json("You don't follow this user")
+        }
+
+    } catch (error) {
+        res.status(500).json(error)
+    }
+}
+
+module.exports = {updateUser, deleteUser, getUser, followUser, unFollowUser}

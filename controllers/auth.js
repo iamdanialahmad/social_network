@@ -4,15 +4,12 @@ const bcrypt = require("bcrypt");
 
 // User Signup
 const signup = async (req, res)=>{
-    req.body = {
-        "username": "faizan",
-        "fullname": "FaizanQazi",
-        "email": "faizn@gmail.com",
-        "password": "123124243"
-    }
+    
     try {
+       
             // Checking if the user already exist with email or username
             await User.findOne({email: req.body.email}) && res.status(500).json("User with this email already exists");
+            console.log("Inside signup")
 
             await User.findOne({username: req.body.username}) && res.status(500).json("Username  not available");
 
