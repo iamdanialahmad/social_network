@@ -1,14 +1,16 @@
 /* eslint-disable no-underscore-dangle */
+
+const io = require('../socket');
 const Post = require('../models/Post');
 const User = require('../models/User');
 
 module.exports.createPost = async (req, res) => {
   try {
-    const user = await User.findById(req.body.userId);
+    const user = await User.findById(req.params.userId);
     const newPost = new Post(req.body);
-
     await newPost.save();
     await user.updateOne({ $push: { posts: newPost._id } });
+    io.getIO().emit('posts', { action: 'create', post: newPost });
     return res.status(201).json(newPost);
   } catch (err) {
     return res.status(409).json(err);
