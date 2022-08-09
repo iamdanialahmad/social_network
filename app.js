@@ -6,11 +6,12 @@ const bodyParser = require('body-parser');
 const app = express();
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-
-const errorController = require('./controllers/errors');
+const cookieParser = require('cookie-parser');
 
 const PORT = process.env.PORT || 5003;
 const { userRoute, authRoute, postRoute } = require('./routes.js');
+const requireAuth = require('./middleware/authMiddleware');
+const invalidRouter = require('./routes/invalidRoute');
 
 dotenv.config();
 
@@ -25,8 +26,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 // parse application/json
 app.use(bodyParser.json());
+app.use(express.json());
+app.use(cookieParser());
 
 app.use('/api/auth', authRoute);
-app.use('/api/users', userRoute);
-app.use('/api/posts', postRoute);
-app.use(errorController.get404);
+app.use('/api/users', requireAuth, userRoute);
+app.use('/api/posts', requireAuth, postRoute);
+app.all('/*', invalidRouter);
