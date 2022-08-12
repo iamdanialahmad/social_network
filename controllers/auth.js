@@ -32,7 +32,10 @@ const signup = async (req, res) => {
 
     // Saving user to database
     await newUser.save();
-    return res.status(200).json({ user: newUser._id });
+    return res.status(200).json({
+      Message: 'User Created Succesfully',
+      userId: newUser._id,
+    });
   } catch (err) {
     return res.status(500).json(err);
   }

@@ -4,6 +4,7 @@
 const bcrypt = require('bcrypt');
 
 const User = require('../models/User');
+const Post = require('../models/Post');
 
 module.exports.updateUser = async (req, res) => {
   // Checking if the user is trying to change anyother user
@@ -58,28 +59,25 @@ module.exports.getUser = async (req, res) => {
 };
 module.exports.followUser = async (req, res) => {
   try {
+    // executing query to check if the
     const user = await User.findById(req.body.userId);
     if (!user) {
-      return res.status(404).json('User doesnot exists');
-    }
+      res.status(404).json('User doesnot exists');
+    } else {
+      const Currentuser = await User.findById(req.params.id);
 
-    const Currentuser = await User.findById(req.params.id);
-
-    if (!Currentuser.following.includes(req.body.userId)) {
-      await Currentuser.updateOne({ $push: { following: req.body.userId } });
-      await user.updateOne({ $push: { followers: req.params.id } });
-      return res.status(200).json('User followed');
+      if (!Currentuser.following.includes(req.body.userId)) {
+        await Currentuser.updateOne({ $push: { following: req.body.userId } });
+        await user.updateOne({ $push: { followers: req.params.id } });
+        res.status(200).json('User followed');
+      } else res.status(403).json('You already follow this user');
     }
-    return res.status(403).json('You already follow this user');
   } catch (error) {
     return res.status(500).json(error);
   }
 };
 
 module.exports.unFollowUser = async (req, res) => {
-  req.body = {
-    unfollowUserId: '62ee5bb8bdca91abea0b38a8',
-  };
   try {
     const unfollowUser = await User.findById(req.body.unfollowUserId);
     if (!unfollowUser) {
@@ -95,5 +93,30 @@ module.exports.unFollowUser = async (req, res) => {
     return res.status(403).json("You don't follow this user");
   } catch (error) {
     return res.status(500).json(error);
+  }
+};
+
+module.exports.postModeration = async (req, res) => {
+  try {
+    // destructure page and limit and set default values
+    const { page = 1, limit = 6 } = req.query;
+    // get total documents in the Posts collection
+    const totalItems = await Post.find({}).countDocuments();
+
+    // execute query with page and limit values
+    const posts = await Post.find({})
+      .limit(limit * 1)
+      .skip((page - 1) * page)
+      .sort({ createdAt: -1 })
+      .select('-userId -likes -reported -updatedAt -__v')
+      .exec();
+    // return response with posts, total pages, and current page
+    res.status(200).json({
+      posts,
+      totalPages: Math.ceil((totalItems / limit)),
+      CurrentPage: page,
+    });
+  } catch (error) {
+    res.status(500).json(error);
   }
 };
