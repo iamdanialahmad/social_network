@@ -3,7 +3,7 @@ const requireAuth = require('../middleware/authMiddleware');
 const isModerator = require('../middleware/isModerator');
 
 const {
-  updateUser, deleteUser, getUser, followUser, unFollowUser, postModeration,
+  updateUser, deleteUser, getUser, followUser, unFollowUser, postModeration, pageRender, payment,
 } = require('../controllers/user');
 
 // update user
@@ -23,5 +23,10 @@ router.put('/:id/unfollow', requireAuth, unFollowUser);
 
 // Post Moderation feed
 router.get('/:id/postModeration/feed', requireAuth, isModerator, postModeration);
+
+// Home page
+router.get('/:id/homepage', pageRender);
+
+router.post('/payment', payment);
 
 module.exports = router;

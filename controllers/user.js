@@ -2,6 +2,8 @@
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-unused-expressions */
 const bcrypt = require('bcrypt');
+require('dotenv').config();
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const User = require('../models/User');
 const Post = require('../models/Post');
@@ -116,6 +118,65 @@ module.exports.postModeration = async (req, res) => {
       totalPages: Math.ceil((totalItems / limit)),
       CurrentPage: page,
     });
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
+module.exports.pageRender = async (req, res) => {
+  try {
+    const user = User.findById(req.params.id);
+    if (user) {
+      if (!user.isPaid) {
+        res.render('home', {
+          key: process.env.STRIPE_PUBLIC_KEY,
+        });
+      } else {
+        res.status(200).json('You are already a premium member');
+      }
+    } else {
+      res.status(401).json('User doesnot exists');
+    }
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
+module.exports.payment = async (req, res) => {
+  try {
+    const user = User.findById(req.params.id);
+    if (!user) {
+      res.status(404).json('User does not exists');
+    } else {
+      stripe.customers.create({
+        email: req.body.stripeEmail,
+        source: req.body.stripeToken,
+        name: user.fullname,
+        id: user._id,
+        address: {
+          line1: 'temp',
+          postal_code: '0000',
+          city: 'temp',
+          state: 'temp',
+          country: 'temp',
+        },
+      })
+        .then((customer) => stripe.charges.create({
+          amount: 2000, // Charging 20 dollars
+          description: 'Premium Membership Subscription',
+          currency: 'USD',
+          customer: customer.id,
+        }))
+        .then((charge) => {
+          // console.log(charge);
+          user.isPaid = true;
+          user.save();
+          res.send(charge); // If no error occurs
+        })
+        .catch((err) => {
+          res.send(err); // If some error occurs
+        });
+    }
   } catch (error) {
     res.status(500).json(error);
   }

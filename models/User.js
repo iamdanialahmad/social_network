@@ -51,6 +51,10 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isPaid: {
+      type: Boolean,
+      default: false,
+    },
     createdAt: {
       type: Date,
       immutable: true,

@@ -11,7 +11,7 @@ const isAuth = (req, res, next) => {
       } else {
         req.user = user;
         if (req.user.userId === req.params.id) next();
-        else res.status(402).json('User not logged in');
+        else res.status(403).json('User not logged in');
       }
     });
   } catch (error) {
