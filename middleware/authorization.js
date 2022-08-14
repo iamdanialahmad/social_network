@@ -5,13 +5,12 @@ require('dotenv').config();
 const isAuth = (req, res, next) => {
   try {
     const token = req.headers.authorization.split(' ')[1];
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
-      if (err) {
-        res.status(403).json(err);
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, decoded) => {
+      if (error) {
+        res.status(403).json({ Error: error, Message: 'Access Forbidden' });
       } else {
-        req.user = user;
-        if (req.user.userId === req.params.id) next();
-        else res.status(403).json('User not logged in');
+        req.userId = decoded.userId;
+        next();
       }
     });
   } catch (error) {
