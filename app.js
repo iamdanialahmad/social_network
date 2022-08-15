@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
 const path = require('path');
+const cors = require('cors');
 
 dotenv.config();
 
@@ -15,6 +16,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(cookieParser());
+
+app.use(cors());
 
 // parse application/x-www-form-urlencoded
 

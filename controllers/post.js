@@ -15,7 +15,7 @@ module.exports.createPost = async (req, res) => {
     await user.updateOne({ $push: { posts: newPost._id } });
     await newPost.save();
 
-    io.getIO().emit('posts', { action: 'create', post: newPost });
+    // io.getIO().emit('posts', { action: 'create', post: newPost });
 
     return res.status(201).json('Post succesfully created');
   } catch (err) {

@@ -3,18 +3,17 @@ const requireAuth = require('../middleware/authorization');
 const {
   createPost, updatePost, deletePost, getPost,
 } = require('../controllers/post');
-// create a post
 
+// POST /
 router.post('/', requireAuth, createPost);
-// update a post
 
+// PUT /:postId
 router.put('/:postId', requireAuth, updatePost);
-// delete a post
 
+// DELETE /:postId
 router.delete('/:postId', requireAuth, deletePost);
 
-// get a post
-
+// GET /:postId
 router.get('/:postId', requireAuth, getPost);
 
 module.exports = router;

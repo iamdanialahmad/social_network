@@ -151,7 +151,7 @@ module.exports.payment = async (req, res) => {
         currency: 'USD',
         customer: customer.id,
       }))
-      .then(async (charge) => {
+      .then(async () => {
         user.isPaid = true;
         await user.save();
         res.status(200).json('Payment Succesfull'); // If no error occurs
