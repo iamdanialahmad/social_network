@@ -8,7 +8,7 @@ const userFeed = async (req, res) => {
     const currUser = await User.findById(req.userId);
 
     if (!currUser.isPaid) {
-      res.status(403).json('you are not a premium member ');
+      res.status(403).json('you are not a premium member');
     } else {
       // get total documents in the Posts collection
       const totalItems = await Post.find({ userId: { $in: currUser.following } }).countDocuments();

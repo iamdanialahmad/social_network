@@ -11,11 +11,11 @@ const signup = async (req, res) => {
   try {
     // Checking if the user already exist with email or username
     if (await User.findOne({ email: req.body.email })) {
-      return res.status(422).json('User with this email already exists');
+      return res.status(400).json('Credentials not available');
     }
 
     if (await User.findOne({ username: req.body.username })) {
-      return res.status(422).json('Username  not available');
+      return res.status(400).json('Credentials not available');
     }
 
     // generate new password
@@ -32,7 +32,7 @@ const signup = async (req, res) => {
 
     // Saving user to database
     await newUser.save();
-    return res.status(200).json({
+    return res.status(201).json({
       Message: 'User Created Succesfully',
       userId: newUser._id,
     });
@@ -47,12 +47,12 @@ const login = async (req, res) => {
     // Checking if the user already exists
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
-      return res.status(404).json('user not found');
+      return res.status(403).json('Wrong credentials');
     }
     // Validating password
     const validPassword = await bcrypt.compare(req.body.password, user.password);
     if (!validPassword) {
-      return res.status(400).json('wrong password');
+      return res.status(403).json('Wrong credentials');
     }
 
     // Creating jwt token

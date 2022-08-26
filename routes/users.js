@@ -3,7 +3,7 @@ const requireAuth = require('../middleware/authorization');
 const isModerator = require('../middleware/isModerator');
 
 const {
-  updateUser, deleteUser, getUser, followUser, unFollowUser, postModeration, pageRender, payment,
+  updateUser, deleteUser, getUser, followUser, unFollowUser, postModeration, payment,
 } = require('../controllers/user');
 
 // PUT      Updates User
@@ -23,9 +23,6 @@ router.put('/unfollow', requireAuth, unFollowUser);
 
 // GET /postmoderation/feed    Feed for moderator
 router.get('/postModeration/feed', requireAuth, isModerator, postModeration);
-
-// Home page
-router.get('/homepage', requireAuth, pageRender);
 
 // POST /payment     Subscipting to access social feed
 router.post('/payment', requireAuth, payment);

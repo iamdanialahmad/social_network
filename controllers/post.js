@@ -12,12 +12,12 @@ module.exports.createPost = async (req, res) => {
     newPost.userId = req.userId;
     newPost.createrName = user.fullname;
 
-    await user.updateOne({ $push: { posts: newPost._id } });
+    await user.updateOne({ $push: { posts: newPost._id.toString() } });
     await newPost.save();
 
-    // io.getIO().emit('posts', { action: 'create', post: newPost });
+    io.getIO().emit('posts', { action: 'create', post: newPost });
 
-    return res.status(201).json('Post succesfully created');
+    return res.status(201).json({ message: 'Post succesfully created', postId: newPost._id });
   } catch (err) {
     return res.status(500).json(`Error: ${err}`);
   }
@@ -27,9 +27,8 @@ module.exports.updatePost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.postId);
     await post.updateOne({ $set: req.body });
-    res.status(200).json('Post successfully updated.');
+    res.status(200).json({ message: 'Post succesfully created', postId: post._id.toString() });
   } catch (err) {
-    console.log(err);
     res.status(500).json(`Errors: ${err}`);
   }
 };
@@ -50,10 +49,8 @@ module.exports.deletePost = async (req, res) => {
 module.exports.getPost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.postId);
-    if (post) {
-      const { updatedAt, reported, ...other } = post._doc;
-      res.status(200).json(other);
-    } else res.status(404).json('Post does not exists');
+    const { updatedAt, reported, ...other } = post._doc;
+    res.status(200).json(other);
   } catch (err) {
     res.status(500).json(`Errors: ${err}`);
   }
