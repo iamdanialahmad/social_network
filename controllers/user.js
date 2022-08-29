@@ -2,6 +2,7 @@
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-unused-expressions */
 require('dotenv').config();
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const User = require('../models/User');
 const Post = require('../models/Post');
@@ -99,5 +100,66 @@ module.exports.postModeration = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json(error);
+  }
+};
+
+module.exports.pageRender = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (user) {
+      if (!user.isPaid) {
+        res.render('home', {
+          key: process.env.STRIPE_PUBLIC_KEY,
+        });
+      } else {
+        res.status(200).json('You are already a premium member');
+      }
+    } else {
+      res.status(404).json('User doesnot exists');
+    }
+  } catch (error) {
+    res.status(500).json(`Error: ${error}`);
+  }
+};
+
+module.exports.payment = async (req, res) => {
+  try {
+    const StripeToken = await stripe.tokens.create({
+      card: {
+        number: req.body.number,
+        exp_month: req.body.exp_month,
+        exp_year: req.body.exp_year,
+        cvc: req.body.cvc,
+      },
+    });
+    const user = await User.findById(req.userId);
+    stripe.customers.create({
+      source: StripeToken.id,
+      name: user.fullname,
+      id: user._id,
+      address: {
+        line1: 'temp',
+        postal_code: '0000',
+        city: 'temp',
+        state: 'temp',
+        country: 'temp',
+      },
+    })
+      .then((customer) => stripe.charges.create({
+        amount: 2000, // Charging 20 dollars
+        description: 'Premium Membership Subscription',
+        currency: 'USD',
+        customer: customer.id,
+      }))
+      .then(async (charge) => {
+        user.isPaid = true;
+        await user.save();
+        res.status(200).json('Payment Succesfull'); // If no error occurs
+      })
+      .catch((err) => {
+        res.send(err); // If some error occurs
+      });
+  } catch (error) {
+    res.status(500).json(`Error: ${error}`);
   }
 };
