@@ -9,7 +9,7 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
 
-const PORT = process.env.PORT || 5003;
+const PORT = process.env.PORT || 3000;
 const {
   userRoute, authRoute, postRoute, feedRoute,
 } = require('./routes.js');
@@ -21,8 +21,8 @@ mongoose.connect(process.env.MONGO_URL)
   .then(async () => {
     const server = app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
     const io = require('./socket')(server);
-    io.on('Connection', (socket) => {
-      console.log(`Client Connected Socket : ${socket}`);
+    io.on('Connection', () => {
+      console.log('Client Connected Socket ');
     });
   })
   .catch((err) => console.log(err.message));
@@ -39,5 +39,4 @@ app.use('/api/auth', authRoute);
 app.use('/api/feed', feedRoute);
 app.use('/api/users', userRoute);
 app.use('/api/posts', postRoute);
-
 app.all('/*', invalidRouter);
