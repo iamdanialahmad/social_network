@@ -1,10 +1,10 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 // Post Schema
 const PostSchema = new mongoose.Schema(
   {
     userId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
     },
@@ -20,16 +20,16 @@ const PostSchema = new mongoose.Schema(
       default: [],
     },
     reported: {
-        type: String,
-        default: ''
-    }
+      type: String,
+      default: '',
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-PostSchema.pre("save", function(next){
-    this.updatedAt = Date.now()
-    next()
-})
+PostSchema.pre('updateOne', function (next) {
+  this.updatedAt = Date.now();
+  next();
+});
 
-module.exports = mongoose.model("Post", PostSchema);
+module.exports = mongoose.model('Post', PostSchema);
