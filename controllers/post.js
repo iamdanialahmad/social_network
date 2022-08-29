@@ -1,21 +1,23 @@
 /* eslint-disable no-underscore-dangle */
+
+const io = require('../socket');
 const Post = require('../models/Post');
 const User = require('../models/User');
 
-const createPost = async (req, res) => {
+module.exports.createPost = async (req, res) => {
   try {
-    const user = await User.findById(req.body.userId);
+    const user = await User.findById(req.params.userId);
     const newPost = new Post(req.body);
-
     await newPost.save();
     await user.updateOne({ $push: { posts: newPost._id } });
+    io.getIO().emit('posts', { action: 'create', post: newPost });
     return res.status(201).json(newPost);
   } catch (err) {
     return res.status(409).json(err);
   }
 };
 
-const updatePost = async (req, res) => {
+module.exports.updatePost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
     if (post.userId === req.body.userId) {
@@ -29,7 +31,7 @@ const updatePost = async (req, res) => {
   }
 };
 
-const deletePost = async (req, res) => {
+module.exports.deletePost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
     const user = await User.findById(req.body.userId);
@@ -45,7 +47,7 @@ const deletePost = async (req, res) => {
   }
 };
 
-const getPost = async (req, res) => {
+module.exports.getPost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
     if (post) {
@@ -56,8 +58,4 @@ const getPost = async (req, res) => {
   } catch (err) {
     return res.status(500).json(err);
   }
-};
-
-module.exports = {
-  createPost, updatePost, deletePost, getPost,
 };

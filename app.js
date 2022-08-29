@@ -1,3 +1,4 @@
+/* eslint-disable global-require */
 /* eslint-disable no-console */
 /* eslint-disable import/extensions */
 const express = require('express');
@@ -6,17 +7,23 @@ const bodyParser = require('body-parser');
 const app = express();
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-
-const errorController = require('./controllers/errors');
+const cookieParser = require('cookie-parser');
 
 const PORT = process.env.PORT || 5003;
-const { userRoute, authRoute, postRoute } = require('./routes.js');
+const {
+  userRoute, authRoute, postRoute, feedRoute,
+} = require('./routes.js');
+const invalidRouter = require('./routes/invalidRoute');
 
 dotenv.config();
 
 mongoose.connect(process.env.MONGO_URL)
   .then(async () => {
-    app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+    const server = app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+    const io = require('./socket')(server);
+    io.on('Connection', (socket) => {
+      console.log(`Client Connected Socket : ${socket}`);
+    });
   })
   .catch((err) => console.log(err.message));
 
@@ -25,8 +32,12 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 // parse application/json
 app.use(bodyParser.json());
+app.use(express.json());
+app.use(cookieParser());
 
 app.use('/api/auth', authRoute);
+app.use('/api/feed', feedRoute);
 app.use('/api/users', userRoute);
 app.use('/api/posts', postRoute);
-app.use(errorController.get404);
+
+app.all('/*', invalidRouter);
