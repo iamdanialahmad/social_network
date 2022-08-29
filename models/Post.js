@@ -8,6 +8,10 @@ const PostSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
+    createrName: {
+      type: String,
+      required: true,
+    },
     desc: {
       type: String,
       max: 500,

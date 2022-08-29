@@ -62,7 +62,7 @@ const login = async (req, res) => {
         userId: user._id.toString(),
       },
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: '1h' },
+      { expiresIn: '24h' },
     );
     return res.status(200).json({ token, userId: user._id });
   } catch (err) {
