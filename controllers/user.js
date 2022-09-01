@@ -24,7 +24,7 @@ module.exports.updateUser = async (req, res) => {
       $set: req.body,
     });
     await user.save();
-    res.status(200).json('Account has been updated');
+    res.status(200).json({ message: 'Account has been updated', updatedUser: user });
   } catch (err) {
     res.status(500).json(`Error: ${err}`);
   }
@@ -103,25 +103,6 @@ module.exports.postModeration = async (req, res) => {
   }
 };
 
-module.exports.pageRender = async (req, res) => {
-  try {
-    const user = await User.findById(req.userId);
-    if (user) {
-      if (!user.isPaid) {
-        res.render('home', {
-          key: process.env.STRIPE_PUBLIC_KEY,
-        });
-      } else {
-        res.status(200).json('You are already a premium member');
-      }
-    } else {
-      res.status(404).json('User doesnot exists');
-    }
-  } catch (error) {
-    res.status(500).json(`Error: ${error}`);
-  }
-};
-
 module.exports.payment = async (req, res) => {
   try {
     const StripeToken = await stripe.tokens.create({
@@ -151,7 +132,7 @@ module.exports.payment = async (req, res) => {
         currency: 'USD',
         customer: customer.id,
       }))
-      .then(async (charge) => {
+      .then(async () => {
         user.isPaid = true;
         await user.save();
         res.status(200).json('Payment Succesfull'); // If no error occurs
